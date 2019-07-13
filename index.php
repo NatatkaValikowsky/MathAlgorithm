@@ -42,6 +42,10 @@ class VNWorkWithMatrix
 
         $this->printMatrix($curr_matrix, 'Поставила ведущий элемент первым');
 
+        $curr_matrix[0] = $this->divideAllElementsOn($curr_matrix[0], $curr_matrix[0][0]);
+
+        $this->printMatrix($curr_matrix, 'Поделила все элементы строки на ведущий');
+
 
 //        while ($this->isStepMatrix($matrix)) {
 //            //todo: приводим матрицу к ступенчатому виду
@@ -149,6 +153,21 @@ class VNWorkWithMatrix
         $matrix[$row2] = $temp_row;
 
         return $matrix;
+    }
+
+    /**
+     * @param $arr
+     * @param $divider
+     * @return mixed
+     * Делим все элементы переданного массива на $divider, возвращаем полученный массив
+     */
+    private function divideAllElementsOn($arr, $divider)
+    {
+        foreach ($arr as $key => $item) {
+            $arr[$key] = $item / $divider;
+        }
+
+        return $arr;
     }
 
     /**
