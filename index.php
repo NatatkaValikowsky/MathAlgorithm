@@ -46,6 +46,12 @@ class VNWorkWithMatrix
 
         $this->printMatrix($curr_matrix, 'Поделила все элементы строки на ведущий');
 
+        $this->printMatrix($this->getPartOfMatrix($curr_matrix, $curr_i, 2, $curr_j, $curr_j), 'Матрица');
+
+//        if ($this->isNullRowOfMatrix($this->getPartOfMatrix($curr_matrix, $curr_i, $curr_i, $curr_j, 2))) {
+//            //
+//        }
+
 
 //        while ($this->isStepMatrix($matrix)) {
 //            //todo: приводим матрицу к ступенчатому виду
@@ -168,6 +174,32 @@ class VNWorkWithMatrix
         }
 
         return $arr;
+    }
+
+    /**
+     * @param $matrix
+     * @param $start_i
+     * @param $end_i
+     * @param $start_j
+     * @param $end_j
+     * @return array
+     * Возвращает часть матрицы по начальным и конечным индексам. Отсчет от 0
+     */
+    private function getPartOfMatrix($matrix, $start_i, $end_i, $start_j, $end_j)
+    {
+        $curr_i = 0;
+        $curr_j = 0;
+        $temp_matrix = [];
+
+        for ($i = $start_i; $i <= $end_i; $i++) {
+            for ($j = $start_j; $j <= $end_j; $j++) {
+                $temp_matrix[$curr_i][$curr_j] = $matrix[$i][$j];
+                $curr_j++;
+            }
+            $curr_i++;
+        }
+
+        return $temp_matrix;
     }
 
     /**
