@@ -22,6 +22,8 @@ class VNWorkWithMatrix
     {
         $curr_i = 0;
         $curr_j = 0;
+        $curr_matrix = $matrix;
+        $host_item = null;
         /**
          * Примерный алгоритм для реализации:
          * (пока Матрица не является ступенчатой){
@@ -31,7 +33,19 @@ class VNWorkWithMatrix
          * }
          */
 
-        var_dump($this->isStepMatrix($matrix));
+        $this->printMatrix($curr_matrix, 'Исходная матрица');
+
+        $host_item = $this->getHostItem($curr_matrix);
+        if ($host_item !== 0) {
+            $curr_matrix = $this->changeRowsOfMatrix($curr_matrix, 0, $host_item);
+        }
+
+        $this->printMatrix($curr_matrix, 'Поставила ведущий элемент первым');
+
+
+//        while ($this->isStepMatrix($matrix)) {
+//            //todo: приводим матрицу к ступенчатому виду
+//        }
     }
 
     /**
@@ -102,13 +116,71 @@ class VNWorkWithMatrix
 
         return false;
     }
+
+    /**
+     * @param $matrix
+     * @return bool|int|string
+     * Находим ненулевой элемент в первом столбце переданной матрицы
+     * Если в столбце все элементы нулевые - возвращаем false
+     */
+    private function getHostItem($matrix)
+    {
+        foreach ($matrix as $key => $row) {
+            if ($row[0] !== 0) {
+                return $key;
+            }
+        }
+
+        return false;
+
+    }
+
+    /**
+     * @param $matrix
+     * @param $row1
+     * @param $row2
+     * @return mixed
+     * Меняем местами две строки в матрице, нумерация начинается с 0
+     */
+    private function changeRowsOfMatrix($matrix, $row1, $row2)
+    {
+        $temp_row = $matrix[$row1];
+        $matrix[$row1] = $matrix[$row2];
+        $matrix[$row2] = $temp_row;
+
+        return $matrix;
+    }
+
+    /**
+     * @param $matrix
+     * @param $title
+     * Распечатываем матрицу в таблице html,
+     * предварительно размещаем заголовок, переданный в $title
+     */
+    private function printMatrix($matrix, $title)
+    {
+        ?>
+        <h1><?php echo $title; ?></h1>
+        <table style="text-align: center;">
+            <?php foreach ($matrix as $row): ?>
+                <tr>
+                    <?php foreach ($row as $item): ?>
+                        <td style="width: 30px;">
+                            <?php echo $item ?>
+                        </td>
+                    <?php endforeach; ?>
+                </tr>
+            <?php endforeach; ?>
+        </table>
+        <?php
+    }
 }
 
 $matrix = [
-    [1, 2, 3, 0, 0],
-    [0, 2, 3, 0, 0],
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0]
+    [0, 2, 3, 5, 10],
+    [0, 2, 3, 2, 0],
+    [0, 4, 14, 3, 3],
+    [10, 13, 15, 9, 0]
 ];
 
 $matrix_check = VNWorkWithMatrix::GetInstance();
