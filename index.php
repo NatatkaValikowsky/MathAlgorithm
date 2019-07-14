@@ -35,27 +35,77 @@ class VNWorkWithMatrix
 
         $this->printMatrix($curr_matrix, 'Исходная матрица');
 
-        $host_item = $this->getHostItem($curr_matrix);
-        if ($host_item !== 0) {
-            $curr_matrix = $this->changeRowsOfMatrix($curr_matrix, 0, $host_item);
+        $flag = 0;
+
+        while ($flag < 3/*!$this->isStepMatrix($matrix)*/) {
+            $host_item = $this->getHostItem($curr_matrix);
+            if($host_item !== false){
+                if($host_item !== 0){
+                    $curr_matrix = $this->changeRowsOfMatrix($curr_matrix, 0, $host_item);
+                }
+
+                $this->printMatrix($curr_matrix, 'Выбор ведущего элемента');
+                $curr_matrix[0] = $this->divideAllElementsOn($curr_matrix[0], $curr_matrix[0][0]);
+                $this->printMatrix($curr_matrix, 'Поделили все элементы строки на ведущий');
+
+                if (!$this->isNullRowOfMatrix(
+                    $this->arrToRow(
+                        $this->getPartOfMatrix($curr_matrix, $curr_i + 1, count($curr_matrix) - 1, 0, 0)
+                    )
+                )) {
+                    $curr_matrix = $this->setZeroElementsUnderHost($curr_matrix);
+                    $this->printMatrix($curr_matrix, 'Привела все элементы ниже ведущего к нулю');
+                }
+
+                $matrix = $this->rewritePartOfMatrix($matrix, $curr_matrix, $curr_i, $curr_j);
+            }
+
+            $curr_i++;
+            $curr_j++;
+            $curr_matrix = $this->getPartOfMatrix($curr_matrix, $curr_i, count($curr_matrix) - 1, $curr_j,count($curr_matrix[0])-1);
+            $flag++;
         }
 
-        $this->printMatrix($curr_matrix, 'Поставила ведущий элемент первым');
-
-        $curr_matrix[0] = $this->divideAllElementsOn($curr_matrix[0], $curr_matrix[0][0]);
-
-        $this->printMatrix($curr_matrix, 'Поделила все элементы строки на ведущий');
-
-        $this->printMatrix($this->getPartOfMatrix($curr_matrix, $curr_i, 2, $curr_j, $curr_j), 'Матрица');
-
-//        if ($this->isNullRowOfMatrix($this->getPartOfMatrix($curr_matrix, $curr_i, $curr_i, $curr_j, 2))) {
-//            //
+        $this->printMatrix($matrix, 'Полученная матрица');
+//        $host_item = $this->getHostItem($curr_matrix);
+//        if ($host_item !== 0) {
+//            $curr_matrix = $this->changeRowsOfMatrix($curr_matrix, 0, $host_item);
 //        }
-
-
-//        while ($this->isStepMatrix($matrix)) {
-//            //todo: приводим матрицу к ступенчатому виду
+//
+//        $this->printMatrix($curr_matrix, 'Поставила ведущий элемент первым');
+//
+//        $curr_matrix[0] = $this->divideAllElementsOn($curr_matrix[0], $curr_matrix[0][0]);
+//
+//        $this->printMatrix($curr_matrix, 'Поделила все элементы строки на ведущий');
+//
+//        if ($this->isNullRowOfMatrix(
+//            $this->arrToRow(
+//                $this->getPartOfMatrix($curr_matrix, $curr_i + 1, count($curr_matrix) - 1, 0, 0)
+//            )
+//        )) {
+//            echo 'Все элементы ниже ведущего нулевые';
 //        }
+//
+//        $matrix = $this->rewritePartOfMatrix($matrix, $curr_matrix, $curr_i, $curr_j);
+//
+//        $curr_i++;
+//        $curr_j++;
+//        $curr_matrix = $this->getPartOfMatrix($curr_matrix, $curr_i, count($curr_matrix) - 1, $curr_j,count($curr_matrix[0])-1);
+//        $this->printMatrix($curr_matrix, 'Исключаем столбец и строку, где стоит ведущий элемент');
+//
+//        $host_item = $this->getHostItem($curr_matrix);
+//        if($host_item !== 0){
+//            $curr_matrix = $this->changeRowsOfMatrix($curr_matrix, 0, $host_item);
+//        }
+//
+//        $curr_matrix[0] = $this->divideAllElementsOn($curr_matrix[0], $curr_matrix[0][0]);
+//        $this->printMatrix($curr_matrix, 'Поделила элементы на ведущий');
+//
+//        $curr_matrix = $this->setZeroElementsUnderHost($curr_matrix);
+//        $this->printMatrix($curr_matrix, 'Привели все элементы к нулю');
+//
+//        $matrix = $this->rewritePartOfMatrix($matrix, $curr_matrix, $curr_i, $curr_j);
+//        $this->printMatrix($matrix, 'Дополнили исходную матрицу преобразованной');
     }
 
     /**
@@ -200,6 +250,68 @@ class VNWorkWithMatrix
         }
 
         return $temp_matrix;
+    }
+
+    private function arrToRow($array)
+    {
+        $result_row = [];
+        foreach ($array as $row) {
+            foreach ($row as $item) {
+                $result_row[] = $item;
+            }
+        }
+
+        return $result_row;
+    }
+
+    private function setZeroElementsUnderHost($matrix)
+    {
+        $i = 0;
+        $matrix_for_edit = [];
+        foreach ($matrix as $row) {
+            $j = 0;
+            foreach ($row as $item) {
+                $matrix_for_edit[$i][$j] = $item;
+                $j++;
+            }
+            $i++;
+        }
+
+        $host_el = $matrix_for_edit[0][0];
+        foreach ($matrix_for_edit as $key => $row) {
+            if ($key !== 0) {
+                $mul_1 = $row[0];
+                if ($mul_1 + $host_el !== 0) $mul_1 = -($mul_1);
+                foreach ($row as $num => $item) {
+                    $matrix_for_edit[$key][$num] = $row[$num] * $host_el + $matrix_for_edit[0][$num] * $mul_1;
+                }
+            }
+        }
+
+        $this->printMatrix($matrix_for_edit, 'Промежуточный результат');
+
+        return $matrix_for_edit;
+    }
+
+    private function rewritePartOfMatrix($base_matrix, $append_matrix, $start_row, $start_col)
+    {
+        if (count($base_matrix) < $start_row + count($append_matrix) || count($base_matrix[0]) < $start_col + count($append_matrix[0])) {
+            return false;
+        }
+
+        $i = $start_row;
+
+
+        foreach ($append_matrix as $row) {
+            $j = $start_col;
+            foreach ($row as $item) {
+                $base_matrix[$i][$j] = $item;
+                $j++;
+            }
+            $i++;
+        }
+
+        return $base_matrix;
     }
 
     /**
